@@ -1,7 +1,7 @@
 enum Opcode
   Add = 1,
-    Multiply = 2,
-    Quit = 99
+  Multiply = 2,
+  Quit = 99
 end
 
 class IntcodeComputer
@@ -28,7 +28,7 @@ class IntcodeComputer
     end
   end
 
-  private def add
+  pivate def add
     binary_op {|a, b| a + b}
   end
 
@@ -79,6 +79,8 @@ class Day2
   end
 end
 
-day2 = Day2.new(File.read("input.txt"))
-puts "Part 1: #{day2.part1}"
-puts "Part 2: #{day2.part2(19690720)}"
+unless PROGRAM_NAME.includes?("crystal-run-spec")
+  day2 = Day2.new(File.read("input.txt"))
+  puts "Part 1: #{day2.part1}"
+  puts "Part 2: #{day2.part2(19690720)}"
+end

@@ -28,6 +28,8 @@ class Day1
   end
 end
 
-day1 = Day1.new(File.read_lines("input.txt"))
-puts "Part 1: #{day1.part1}"
-puts "Part 2: #{day1.part2}"
+unless PROGRAM_NAME.includes?("crystal-run-spec")
+  day1 = Day1.new(File.read_lines("input.txt"))
+  puts "1A: #{day1.part1}"
+  puts "1B: #{day1.part2}"
+end
