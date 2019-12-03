@@ -28,7 +28,7 @@ class IntcodeComputer
     end
   end
 
-  pivate def add
+  private def add
     binary_op {|a, b| a + b}
   end
 
