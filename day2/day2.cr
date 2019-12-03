@@ -36,11 +36,14 @@ class IntcodeComputer
     binary_op {|a, b| a * b}
   end
 
+  # Convenience method for operating on the values of two memory locations (yielding to a block) and storing the result in another memory location
   private def binary_op(&block : (Int32, Int32) -> Int32)
-    inputs = [@program_counter + 1, @program_counter + 2]
+    operands = [@program_counter + 1, @program_counter + 2]
       .map {|idx| @program[idx]}
       .map {|input_location| @program[input_location] }
-    result = yield inputs[0], inputs[1]
+
+    result = (yield operands[0], operands[1])
+
     storage_location = @program[@program_counter + 3]
     @program[storage_location] = result
   end
@@ -55,17 +58,13 @@ class Day2
   end
 
   def part2(goal : Int32) : Int32
-    noun = 0
-    while noun <= 99 
-      verb = 0
-      while verb <= 99 
+    (0..99).each do |noun|
+      (0..99).each do |verb|
         result = run_with_noun_and_verb(noun, verb)
         if result == goal
           return (100 * noun) + verb
         end
-        verb += 1
       end
-      noun += 1
     end
     raise "Something went wrong; we should've had an answer!"
   end

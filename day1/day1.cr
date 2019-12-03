@@ -3,7 +3,7 @@ class Day1
   @input : Array(Int32)
 
   def initialize(input_str : Array(String))
-    @input = input_str.map {|m| m.to_i}
+    @input = input_str.map(&.to_i)
   end
 
   def part1
@@ -11,7 +11,7 @@ class Day1
   end
 
   def part2
-    @input.map do |m|
+    @input.sum do |m|
       total_fuel_requirement = 0
       additional_weight_to_carry = m
       loop do
@@ -20,10 +20,10 @@ class Day1
         total_fuel_requirement += additional_weight_to_carry
       end
       total_fuel_requirement
-    end.sum
+    end
   end
 
-  private def calculate_fuel_requirements(weight : Int32) : Int32
+  private def calculate_fuel_requirements(weight : Int32)
     ((weight / 3).floor - 2).to_i
   end
 end
