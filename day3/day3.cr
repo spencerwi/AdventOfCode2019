@@ -12,23 +12,43 @@ struct Instruction
   end
 end
 
-alias Point = NamedTuple(x: Int32, y: Int32)
+struct Point
+  property x, y
+  def initialize(@x : Int32, @y : Int32)
+  end
+
+  def adjacent_point(direction : Char) : Point
+    new_x, new_y = 
+      case direction
+      when 'U' then {@x, @y + 1}
+      when 'R' then {@x + 1, @y}
+      when 'L' then {@x - 1, @y}
+      when 'D' then {@x, @y - 1}
+      else raise "Unrecognized direction: #{direction}"
+      end
+    Point.new(new_x, new_y)
+  end
+
+  def distance_from_center : Int32
+    @x.abs + @y.abs
+  end
+end
 
 class LineFollower
+  @instructions : Array(Instruction)
   @points_seen : Hash(Point, Int32)
   @current_point : Point
   @current_steps_taken : Int32
-  @instructions : Array(Instruction)
 
   getter points_seen
 
   def initialize(@instructions)
     @points_seen = Hash(Point, Int32).new
-    @current_point = {x: 0, y: 0}
+    @current_point = Point.new(0, 0)
     @current_steps_taken = 0
   end
 
-  def run 
+  def run
     @instructions.each {|instruction| move(instruction)}
   end
 
@@ -39,18 +59,9 @@ class LineFollower
   end
 
   private def step(direction : Char)
-    next_point = 
-      case direction
-      when 'U' then {x: @current_point[:x], y: @current_point[:y] + 1}
-      when 'R' then {x: @current_point[:x] + 1, y: @current_point[:y]}
-      when 'L' then {x: @current_point[:x] - 1, y: @current_point[:y]}
-      when 'D' then {x: @current_point[:x], y: @current_point[:y] - 1}
-      else raise "Unrecognized direction: #{direction}"
-      end
-
-    @points_seen[next_point] = @current_steps_taken + 1
-    @current_point = next_point
+    @current_point = @current_point.adjacent_point(direction)
     @current_steps_taken += 1
+    @points_seen[@current_point] = @current_steps_taken
   end
 end
 
@@ -63,7 +74,7 @@ class Day3
 
   def initialize(wires : Array(String))
     @input = wires.map do |wire_str|
-      wire_str.split(",").map {|instr_str| Instruction.parse(instr_str)}
+      wire_str.split(",").map {|s| Instruction.parse(s)}
     end
 
     @line1, @line2 = @input.map {|instructions| LineFollower.new(instructions)}
@@ -72,9 +83,7 @@ class Day3
   end
 
   def part1
-    return @intersections.min_of do |p|
-      p[:x].abs + p[:y].abs # get the closest manhattan distance from (0,0)
-    end
+    return @intersections.min_of(&.distance_from_center)
   end
 
   def part2
