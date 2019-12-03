@@ -6,10 +6,16 @@ class Day1
     @input = input_str.map(&.to_i)
   end
 
+  # Problem statement: sum up the total fuel requirements 
+  # (see `#calculate_fuel_requirements`) for all modules.
   def part1
     @input.map {|m| calculate_fuel_requirements(m)}.sum
   end
 
+  # Problem statement: sum up the total fuel requirements 
+  # (see `#calculate_fuel_requirements`) for all modules, taking into account 
+  # the fact that the fuel itself needs to be carried, which in turn requires 
+  # more fuel, which in turn requires more fuel, and so on.
   def part2
     @input.sum do |m|
       total_fuel_requirement = 0

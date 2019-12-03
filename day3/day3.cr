@@ -58,6 +58,8 @@ class LineFollower
     end
   end
 
+  # After stepping to a new point, record that we went to that point, and how 
+  # many steps we took before getting there.
   private def step(direction : Char)
     @current_point = @current_point.adjacent_point(direction)
     @current_steps_taken += 1
@@ -79,13 +81,18 @@ class Day3
 
     @line1, @line2 = @input.map {|instructions| LineFollower.new(instructions)}
     [@line1, @line2].each {|lf| lf.run}
+
+    # Find all intersections by pure set-logic: all the points visited by both.
     @intersections = @line1.points_seen.keys.to_set & @line2.points_seen.keys.to_set
   end
 
+  # Problem statement: find the closest intersection to the origin (point 0,0).
   def part1
     return @intersections.min_of(&.distance_from_center)
   end
 
+  # Problem statement: find the intersection that happened after the fewest 
+  # combined steps taken by both "line runners".
   def part2
     return @intersections.min_of do |p|
       @line1.points_seen[p] + @line2.points_seen[p]
