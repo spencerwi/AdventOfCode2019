@@ -2,35 +2,38 @@ require "../day4"
 require "spec"
 
 describe PasswordValidator do
+
   describe ".validate" do
-    it "works for sample input" do
+
+    it "works for sample input, using non-strict repeat group checking" do
       sample_inputs_with_expected_outputs = {
-        111111 => true,
-        122345 => true,
-        111123 => true,
-        115679 => true,
-        223450 => false,
-        123789 => false
+        [1,1,1,1,1,1] => true,
+        [1,2,2,3,4,5] => true,
+        [1,1,1,1,2,3] => true,
+        [1,1,5,6,7,9] => true,
+        [2,2,3,4,5,0] => false,
+        [1,2,3,7,8,9] => false
       }
       sample_inputs_with_expected_outputs.each do |input, output|
         PasswordValidator.validate(input).should eq output
       end
     end
-  end
-end
 
-describe Day4 do
-
-  describe "#part1" do 
-    it "behaves correctly for sample input" do
-      example_inputs_and_outputs = {
-        "111110-111111" => 1
+    it "works for sample input, using strict repeat group checking" do
+      sample_inputs_with_expected_outputs = {
+        [1,1,1,1,1,1] => false,
+        [1,2,2,3,4,5] => true,
+        [1,1,1,1,2,3] => false,
+        [1,2,3,4,4,4] => false,
+        [1,1,1,1,2,2] => true,
+        [2,2,3,4,5,0] => false,
+        [1,2,3,7,8,9] => false
       }
-      example_inputs_and_outputs.each do|input, output|
-        day4 = Day4.new(input)
-        day4.part1.should eq output
+      sample_inputs_with_expected_outputs.each do |input, output|
+        PasswordValidator.validate(input, strict_repeat_group_size: true).should eq output
       end
     end
+
   end
 
 end

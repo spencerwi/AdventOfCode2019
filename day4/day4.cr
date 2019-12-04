@@ -2,8 +2,7 @@ class PasswordValidator
 
   # The same validator works for both part 1 and part 2, we just have to be more
   # strict about the size of repeat groups to search for in part 2.
-  def self.validate(password : Int32, strict_repeat_group_size : Bool = false)
-    digits = password.to_s.chars.map(&.to_i)
+  def self.validate(digits : Array(Int32), strict_repeat_group_size : Bool = false)
     return false unless digits.size == 6
     return false unless self.has_repeated_digits?(digits, strict_repeat_group_size)
     return false unless self.never_decreases?(digits)
@@ -50,7 +49,7 @@ class Day4
   #  - It must have at least one set of consecutive repeating digits 
   #  - Digits must never decrease from left to right
   def part1 : Int32
-    @input_range.count do |password|
+    count_possibly_valid_passwords do |password|
       PasswordValidator.validate(password)
     end
   end
@@ -60,9 +59,40 @@ class Day4
   #  - It must have at least one set of *exactly 2* consecutive repeating digits
   #  - Digits must never decrease from left to right
   def part2 : Int32
-    @input_range.count do |password|
+    count_possibly_valid_passwords do |password|
       PasswordValidator.validate(password, strict_repeat_group_size: true)
     end
+  end
+
+  # We only need to iterate over numbers where:
+  # - There are 6 digits
+  # - None of those digits are smaller than the preceding digit
+  # So we can optimize by never iterating numbers that don't match that pattern.
+  private def count_possibly_valid_passwords(&validator : (Array(Int32)) -> Bool) : Int32
+    return 0 if @input_range.end < 100_000 # Then there'd be no 6-digit numbers
+    return 0 if @input_range.begin >= 1_000_000 # Then there'd be no 6-digit numbers
+    valid_password_count = 0
+
+    digits_in_start_of_range = @input_range.begin.to_s.chars.map(&.to_i)
+    (digits_in_start_of_range[0]..9).each do |a| # digit 1
+      (a..9).each do |b| # digit 2
+        (b..9).each do |c| # digit 3
+          (c..9).each do |d| # digit 4
+            (d..9).each do |e| # digit 5
+              (e..9).each do |f| # digit 6
+                digits = [a,b,c,d,e,f]
+                password = digits.join("").to_i
+                if @input_range.includes?(password) # In case we got, like, 123456, then 111111 shouldn't be valid.
+                  is_valid = (yield digits)
+                  valid_password_count += 1 if is_valid
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+    return valid_password_count
   end
 end
 
