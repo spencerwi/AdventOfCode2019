@@ -34,14 +34,8 @@ class IntcodeComputer
     @printed_values = [] of Int64
   end
 
-  # The "output"of an Intcode program is whatever's stored in memory location 0.
-  def output : Int64
-    @program[0]
-  end
-
   def run : Int64
     loop do
-      iptr_before = @instruction_pointer
       instruction = @program[@instruction_pointer]
       current_opcode, param_modes = parse_instruction(instruction)
       next_jump_amount = 0
@@ -117,6 +111,7 @@ class IntcodeComputer
   private def do_output(param_mode : ParameterMode)
     result = read_param(param_mode, 1)
     @printed_values << result
+    puts result
   end
 
   # Returns a Bool indicating whether a jump happened
@@ -194,8 +189,8 @@ class IntcodeComputer
   end
 
   private def write_result(param_number : Int32, value : Int64)
-    @destination = @program[@instruction_pointer + param_number]
-    print "Writing #{value} to location #{destination}"
-    @program[@destination] = value
+    destination = @program[@instruction_pointer + param_number]
+    puts "Writing #{value} to location #{destination}"
+    @program[destination] = value
   end
 end
