@@ -10,12 +10,13 @@ class Day5
   end
 
   def part2
-    # TODO: this!
+    computer = IntcodeComputer.new(@program, 5)
+    computer.run
   end
 end
 
 unless PROGRAM_NAME.includes?("crystal-run-spec")
   day5 = Day5.new(File.read("input.txt").split(",").map(&.to_i64))
   puts "Part 1: #{day5.part1}"
-  #puts "Part 2: #{day5.part2}"
+  puts "Part 2: #{day5.part2}"
 end

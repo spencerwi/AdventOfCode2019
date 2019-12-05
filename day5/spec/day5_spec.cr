@@ -1,15 +1,4 @@
-require "../day5"
-require "../IntcodeComputer"
-require "spec"
-
-describe IntcodeComputer do
-  it "behaves correctly for sample input" do
-    computer = IntcodeComputer.new([1002,4,3,4,33].map(&.to_i64), 1_i64)
-    computer.run
-    computer.output.should eq 1002_i64
-    computer.program.should eq [1002,4,3,4,99].map(&.to_i64)
-  end
-end
+require "./spec_helper"
 
 # describe Day5 do
 

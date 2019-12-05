@@ -1,0 +1,17 @@
+name: day5
+version: 0.1.0
+
+authors:
+  - Spencer Williams <spencerwi@gmail.com>
+
+targets:
+  day5:
+    main: src/day5.cr
+
+crystal: 0.31.1
+
+license: MIT
+
+development_dependencies:
+  spectator:
+    gitlab: arctic-fox/spectator
