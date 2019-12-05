@@ -1,3 +1,5 @@
+require "http"
+
 def generate_day(day : Int32)
   if Dir.exists?("day#{day}")
     puts "Day #{day} already exists!"
@@ -59,9 +61,28 @@ def generate_day(day : Int32)
   )
 end
 
-if ARGV.size == 1
-  generate_day(ARGV[0].to_i)
+def download_input(day : Int32, session_cookie : String)
+  headers = HTTP::Headers.new
+  headers["Cookie"] = "session#{session_cookie}"
+  HTTP::Client.get(
+    "https://adventofcode.com/2019/day/#{day}/input",
+    headers: headers
+  ) do |response|
+    if response.status.code == 200
+      File.write("day#{day}/input.txt", response.body)
+    else
+      puts "Couldn't fetch input for day #{day}: [#{response.status.code}] #{response.body}"
+    end
+  end
+end
+
+if ARGV.size >= 1
+  day = ARGV[0].to_i
+  generate_day(day)
+  if ARGV.size  >= 2 
+    download_input(day, ARGV[1])
+  end
 else
-  puts "Usage: newday.cr DAYNUMBER"
+  puts "Usage: newday.cr DAYNUMBER [SESSION_COOKIE_FOR_DOWNLOADING_INPUT]"
   exit 1
 end
