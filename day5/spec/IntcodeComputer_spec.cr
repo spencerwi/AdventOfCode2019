@@ -19,28 +19,22 @@ def example_conditional_jump_test_cases
 end
 
 Spectator.describe IntcodeComputer do
-  it "behaves correctly for sample input" do
-    computer = IntcodeComputer.new([1002,4,3,4,33].map(&.to_i64), 1_i64)
-    expect(computer.run).to eq 1002_i64
-    expect(computer.program).to eq [1002,4,3,4,99].map(&.to_i64)
+  sample example_conditional_jump_test_cases do |test_case|
+    it "should pass conditional-jump tests" do
+      program_str, input, expected_output = test_case
+      program = program_str.split(",").map(&.to_i64)
+      computer = IntcodeComputer.new(program, input.to_i64)
+      expect(computer.run).to eq expected_output.to_i64
+    end
   end
 
-#  sample example_conditional_jump_test_cases do |test_case|
-#    it "should pass conditional-jump tests" do
-#      program_str, input, expected_output = test_case
-#      program = program_str.split(",").map(&.to_i64)
-#      computer = IntcodeComputer.new(program, input.to_i64)
-#      expect(computer.run).to eq expected_output.to_i64
-#    end
-#  end
-
-#  it "behaves correctly for complex sample case" do
-#    program = [3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99].map(&.to_i64)
-#    computer = IntcodeComputer.new(program, 7)
-#    expect(computer.run).to eq 999_i64
-#    computer = IntcodeComputer.new(program, 8)
-#    expect(computer.run).to eq 1000_i64
-#    computer = IntcodeComputer.new(program, 9)
-#    expect(computer.run).to eq 1001_i64
-#  end
+  it "behaves correctly for complex sample case" do
+    program = [3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99].map(&.to_i64)
+    computer = IntcodeComputer.new(program, 7)
+    expect(computer.run).to eq 999_i64
+    computer = IntcodeComputer.new(program, 8)
+    expect(computer.run).to eq 1000_i64
+    computer = IntcodeComputer.new(program, 9)
+    expect(computer.run).to eq 1001_i64
+  end
 end

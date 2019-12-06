@@ -5,12 +5,12 @@ class Day5
   end
 
   def part1
-    computer = IntcodeComputer.new(@program, 1)
+    computer = IntcodeComputer.new(@program.clone, 1)
     computer.run
   end
 
   def part2
-    computer = IntcodeComputer.new(@program, 5)
+    computer = IntcodeComputer.new(@program.clone, 5)
     computer.run
   end
 end

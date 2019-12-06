@@ -1,15 +1,7 @@
 DEBUG = false
 enum ParameterMode
-  Position,
-  Immediate
-
-  def self.parse(c : Char)
-    case c
-    when '0' then Position
-    when '1' then Immediate
-    else raise "Invalid ParameterMode: #{c}"
-    end
-  end
+  Position = 0,
+  Immediate = 1
 end
 
 enum Opcode
@@ -78,21 +70,23 @@ class IntcodeComputer
   end
 
   private def parse_instruction(instruction : Int64) : Tuple(Opcode, Array(ParameterMode))
-    digits = instruction.to_s.rjust(5, '0').chars
-    puts digits
-    opcode : Opcode = Opcode.new(digits.last(2).join("").to_i)
+    modes_as_int, opcode_as_int = instruction.divmod(100)
+    opcode : Opcode = Opcode.new(opcode_as_int.to_i)
+    modes_digits = modes_as_int.to_s.rjust(3, '0').chars.reverse.map(&.to_i)
     param_modes : Array(ParameterMode) = 
-      case opcode
-      when Opcode::Quit then
-        [] of ParameterMode
-      when Opcode::Input, Opcode::Output then
-        [ParameterMode.parse(digits[2])]
-      when Opcode::JumpIfFalse, Opcode::JumpIfTrue then
-        digits[1..2].reverse.map{|it| ParameterMode.parse(it)}
-      else
-        digits.first(3).reverse.map{|it| ParameterMode.parse(it)}
-      end
+       case opcode
+       when Opcode::Quit then
+         [] of ParameterMode
+       when Opcode::Input, Opcode::Output then
+         [ParameterMode.new(modes_digits[0])]
+       when Opcode::JumpIfFalse, Opcode::JumpIfTrue then
+         modes_digits.first(2).map{|it| ParameterMode.new(it)}
+       else
+         modes_digits.map{|it| ParameterMode.new(it)}
+       end
+    if DEBUG
     puts [opcode, param_modes]
+    end
     return {opcode, param_modes}
   end
 
@@ -190,7 +184,9 @@ class IntcodeComputer
 
   private def write_result(param_number : Int32, value : Int64)
     destination = @program[@instruction_pointer + param_number]
+    if DEBUG
     puts "Writing #{value} to location #{destination}"
+    end
     @program[destination] = value
   end
 end
