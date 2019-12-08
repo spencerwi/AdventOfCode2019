@@ -9,16 +9,21 @@ class Planet
   end
 
   def count_orbits
-    return 0 unless @parent
+    return 0 if @parent.nil?
     direct_orbits = 1
-    indirect_orbits = 0
-    current = @parent.not_nil!.parent
+    indirect_orbits = @parent.not_nil!.ancestors.size
+    return direct_orbits + indirect_orbits
+  end
+
+  def ancestors : Array(Planet)
+    result = [] of Planet
+    current = @parent
     loop do
       break if current.nil?
-      indirect_orbits += 1
-      current = current.not_nil!.parent
+      result << current
+      current = current.parent
     end
-    return direct_orbits + indirect_orbits
+    return result
   end
 
   def self.parse_orbits(input_lines : Array(String))
@@ -43,17 +48,37 @@ class Day6
     @planets = Planet.parse_orbits(input_lines)
   end
 
+  # Problem statement: count the number of direct and indirect orbits specified
   def part1
     @planets.each_value.sum(&.count_orbits)
   end
 
+  # Problem statement: find the minimum distance between the object you orbit
+  # and the object Santa orbits.
   def part2
-    # TODO: this!
+    you_parent = @planets["YOU"]
+    santa_parent = @planets["SAN"]
+    return distance_between(you_parent, santa_parent)
+  end
+
+  private def distance_between(a : Planet, b : Planet) : Int32
+    ancestors_of_a = a.ancestors
+    ancestors_of_b = b.ancestors
+    lowest_common_ancestor = ancestors_of_b.find do |b_ancestor|
+      ancestors_of_a.includes?(b_ancestor)
+    end
+    if lowest_common_ancestor.nil?
+      raise "Something went wrong!"
+    else
+      hops_from_b = ancestors_of_b.index(lowest_common_ancestor).not_nil!
+      hops_from_a = ancestors_of_a.index(lowest_common_ancestor).not_nil!
+      return hops_from_b + hops_from_a
+    end
   end
 end
 
 unless PROGRAM_NAME.includes?("crystal-run-spec")
   day6 = Day6.new(File.read_lines("input.txt"))
   puts "Part 1: #{day6.part1}"
-  #puts "Part 2: #{day6.part2}"
+  puts "Part 2: #{day6.part2}"
 end
