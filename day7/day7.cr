@@ -50,14 +50,8 @@ class Day7
         end
       end
 
-      #computers_by_name.each_value do |amp|
-      #  puts "#{amp.name}, in: #{amp.input_channel}, out: #{amp.output_channel}"
-      #end
-
       # Kick them all off concurrently for their first round
-      computers_by_name.each_value do |amp|
-        amp.run
-      end
+      computers_by_name.each_value(&.run)
 
       # Block the main thread until the first round finishes 
       Fiber.yield

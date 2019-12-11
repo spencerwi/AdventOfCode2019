@@ -9,7 +9,7 @@ class Day1
   # Problem statement: sum up the total fuel requirements 
   # (see `#calculate_fuel_requirements`) for all modules.
   def part1
-    @input.map {|m| calculate_fuel_requirements(m)}.sum
+    @input.sum {|m| calculate_fuel_requirements(m)}
   end
 
   # Problem statement: sum up the total fuel requirements 

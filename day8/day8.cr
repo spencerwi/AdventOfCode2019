@@ -21,14 +21,10 @@ class SpaceImage
     @layers = @data.in_groups_of(@width, 0).in_groups_of(@height, [] of Int32)
   end
 
-  def get_pixel_color(x : Int32, y : Int32)
+  def get_pixel_color(x : Int32, y : Int32) : Colors
     layer_values_for_pixel = @layers.map {|layer| layer.dig?(y, x) || 0}
-    top_opaque_pixel = layer_values_for_pixel.find {|x| x != Colors::Transparent.value}
-    if top_opaque_pixel.nil?
-      return Colors::Transparent
-    else
-      return Colors.new(top_opaque_pixel)
-    end
+    top_opaque_pixel = layer_values_for_pixel.map {|it| Colors.new(it)}.reject(Colors::Transparent).first?
+    return top_opaque_pixel || Colors::Transparent
   end
 
   def render_as_text
@@ -49,9 +45,7 @@ class Day8
 
   def part1
     layer_with_fewest_zeroes = @image.layers.min_by {|layer| layer.flatten.count(&.zero?)}
-    counts = layer_with_fewest_zeroes.flatten
-      .group_by(&.itself)
-      .transform_values(&.size)
+    counts = layer_with_fewest_zeroes.flatten.tally
 
     return counts[1] * counts[2]
   end

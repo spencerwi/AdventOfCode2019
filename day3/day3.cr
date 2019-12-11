@@ -1,6 +1,6 @@
 struct Instruction
-  property direction
-  property distance
+  getter direction
+  getter distance
 
   def initialize(@direction : Char, @distance : Int32)
   end
@@ -13,7 +13,7 @@ struct Instruction
 end
 
 struct Point
-  property x, y
+  getter x, y
   def initialize(@x : Int32, @y : Int32)
   end
 
@@ -80,7 +80,7 @@ class Day3
     end
 
     @line1, @line2 = @input.map {|instructions| LineFollower.new(instructions)}
-    [@line1, @line2].each {|lf| lf.run}
+    [@line1, @line2].each(&.run)
 
     # Find all intersections by pure set-logic: all the points visited by both.
     @intersections = @line1.points_seen.keys.to_set & @line2.points_seen.keys.to_set

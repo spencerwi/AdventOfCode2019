@@ -22,8 +22,8 @@ class SpaceGrid
   # Returns a Hash of the asteroids we see when look out at a specific angle
   # from a given "start asteroid". The hash key is the angle, the hash value 
   # is the coordinates of the first asteroid seen when looking that direction.
-  def asteroids_seen_from_cell(x : Int32, y : Int32) : Hash(Float64, Point)
-    angles_towards_asteroids_from_point({x, y})
+  def asteroids_seen_from_point(point : Point) : Hash(Float64, Point)
+    angles_towards_asteroids_from_point(point)
       .transform_values(&.first)
   end
 
@@ -61,7 +61,7 @@ class SpaceGrid
   private def cells_of_type(cell_type : Char)
     @spaces.each_with_index.flat_map do |(row, y)|
       row.each_with_index
-        .select {|(value, x)| value == cell_type}
+        .select {|(cell_value, x)| cell_value == cell_type}
         .map {|(_, x)| {x, y}}
     end.to_a
   end
@@ -81,15 +81,14 @@ class Day10
   @grid : SpaceGrid
 
   def initialize(input_lines : Array(String))
-    @grid = SpaceGrid.new(input_lines.map(&.strip).map(&.chars))
+    @grid = SpaceGrid.new(input_lines.map(&.strip.chars))
   end
 
   # Find the asteroid from which the most other asteroids can be seen, taking
   # into account that an asteroid blocks the view to any asteroids behind it.
   def part1 : Tuple(Point, Int32)
-    @grid.asteroids.map do |(x, y)|
-      asteroids_seen_from_point = @grid.asteroids_seen_from_cell(x, y)
-      { {x, y}, asteroids_seen_from_point.size }
+    @grid.asteroids.map do |point|
+      { point, @grid.asteroids_seen_from_point(point).size }
     end.max_by(&.last)
   end
 
