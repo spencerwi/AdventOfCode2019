@@ -3,6 +3,13 @@ require "./IntcodeComputer"
 enum Color
   Black,
   White
+
+  def to_s
+    case self
+    when Black then " "
+    when White then "#"
+    end.not_nil!
+  end
 end
 
 enum TurnDirection
@@ -83,10 +90,10 @@ class Robot
     x, y = @current_location
     @current_location = 
       case @direction_facing
-      when GridDirection::North then {x,     y + 1}
+      when GridDirection::North then {x,     y - 1}
       when GridDirection::West  then {x - 1, y}
       when GridDirection::East  then {x + 1, y}
-      when GridDirection::South then {x,     y - 1}
+      when GridDirection::South then {x,     y + 1}
       end.not_nil!
   end
 end
@@ -102,12 +109,23 @@ class Day11
   end
 
   def part2
-    # TODO: this!
+    robot = Robot.new(@input, Color::White)
+    robot.run
+    all_points_painted = robot.squares_painted.keys
+    min_y, max_y = all_points_painted.minmax_of(&.[1])
+    min_x, max_x = all_points_painted.minmax_of(&.[0])
+
+    (min_y..max_y).each do |y|
+      (min_x..max_x).each do |x|
+        print robot.squares_painted[{x,y}].to_s
+      end
+      print "\n"
+    end
   end
 end
 
 unless PROGRAM_NAME.includes?("crystal-run-spec")
   day11 = Day11.new(File.read("input.txt").split(",").map(&.to_i64))
   puts "Part 1: #{day11.part1}"
-  #puts "Part 2: #{day11.part2}"
+  puts "Part 2: #{day11.part2}"
 end
