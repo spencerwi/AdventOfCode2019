@@ -63,7 +63,7 @@ end
 
 def download_input(day : Int32, session_cookie : String)
   headers = HTTP::Headers.new
-  headers["Cookie"] = "session#{session_cookie}"
+  headers["Cookie"] = "session=#{session_cookie}"
   HTTP::Client.get(
     "https://adventofcode.com/2019/day/#{day}/input",
     headers: headers
