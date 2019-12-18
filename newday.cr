@@ -69,7 +69,7 @@ def download_input(day : Int32, session_cookie : String)
     headers: headers
   ) do |response|
     if response.status.code == 200
-      File.write("day#{day}/input.txt", response.body)
+      File.write("day#{day}/input.txt", response.body_io)
     else
       puts "Couldn't fetch input for day #{day}: [#{response.status.code}] #{response.body}"
     end
