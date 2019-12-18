@@ -24,30 +24,23 @@ enum Opcode
   Quit = 99
 end
 
-enum ComputerState
-  Running,
-  WaitingForInput,
-  WaitingForOutputReceived,
-  Completed
-end
-
 class IntcodeComputer
   @program : Array(Int64)
   @instruction_pointer : Int64 
   @most_recent_output : Int64?
-  @state : ComputerState
+  @has_finished : Bool
   @relative_base : Int32
   @debug_level : DebugLevel
 
   getter program
-  getter state
+  getter has_finished
   getter most_recent_output
 
   def initialize(program : Array(Int64), @input_queue : Array(Int64), @debug_level = DebugLevel::None)
     @program = program.clone
     @instruction_pointer = 0
     @most_recent_output = nil
-    @state = ComputerState::Running
+    @has_finished = false
     @relative_base = 0
   end
 
@@ -57,7 +50,6 @@ class IntcodeComputer
       current_opcode, param_modes = parse_instruction(instruction)
       next_jump_amount = 0
       debug_log "Executing #{instruction} (#{current_opcode}, #{param_modes})"
-      @state = ComputerState::Running
       case current_opcode
       when Opcode::Quit then 
         on_quit
@@ -165,11 +157,7 @@ class IntcodeComputer
   end
 
   protected def on_quit
-    @computer_state = ComputerState::Completed
-  end
-
-  def has_finished
-    @computer_state == ComputerState::Completed
+    @has_finished = true
   end
 
   def adjust_relative_base(param_mode : ParameterMode)
@@ -242,37 +230,25 @@ class IntcodeComputer
   end
 end
 
-class NetworkedIntcodeComputer < IntcodeComputer
-  @input_channel : Channel(Int64)
-  @output_channel : Channel(Int64)
-
+class YieldingIntcodeComputer < IntcodeComputer
   getter name
-  property input_channel, output_channel
 
-  def initialize(program : Array(Int64), @name : String, @debug_level = DebugLevel::None )
+  def initialize(
+    program : Array(Int64), 
+    @name : String, 
+    @get_input_callback : Proc(Int64),
+    @handle_output_callback : Proc(Int64, Nil),
+    @debug_level = DebugLevel::None, 
+  )
     super(program, [] of Int64, @debug_level)
-    @input_channel = Channel(Int64).new
-    @output_channel = Channel(Int64).new
-  end
-
-  def run
-    spawn do
-      super
-    end
-  end
-
-  protected def on_quit
-    super
-    @input_channel.close
-    @output_channel.close
+    @get_input_callback = get_input_callback
+    @handle_output_callback = handle_output_callback
   end
 
   protected def do_input(param_mode : ParameterMode)
     debug_log("Waiting for input, last output was #{@most_recent_output}", level = DebugLevel::IO)
-    @state = ComputerState::WaitingForInput
-    result = @input_channel.receive
+    result = @get_input_callback.call
     write_result(param_mode, 1, result)
-    @state = ComputerState::Running
     debug_log("Received #{result}", level = DebugLevel::IO)
   end
 
@@ -280,9 +256,7 @@ class NetworkedIntcodeComputer < IntcodeComputer
     result = read_param(param_mode, 1)
     @most_recent_output = result
     debug_log("Sending: #{result}", level = DebugLevel::Outputs)
-    @state = ComputerState::WaitingForOutputReceived
-    @output_channel.send(result)
-    @state = ComputerState::Running
+    @handle_output_callback.call(result)
   end
 
   protected def debug_log(msg, level = DebugLevel::Debug)

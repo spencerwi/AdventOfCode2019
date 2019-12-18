@@ -1,0 +1,13 @@
+name: day11
+version: 0.1.0
+
+authors:
+  - Spencer Williams <spencerwi@gmail.com>
+
+targets:
+  day11:
+    main: src/day11.cr
+
+crystal: 0.32.0
+
+license: MIT

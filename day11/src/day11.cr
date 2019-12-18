@@ -41,33 +41,21 @@ class Robot
 
   getter squares_painted
 
-  def initialize(@computer : NetworkedIntcodeComputer)
+  def initialize(program : Array(Int64), start_panel_color : Color = Color::Black)
+    @computer = YieldingIntcodeComputer.new(
+      program, 
+      "Robot Computer",
+      ->() { decide_input },
+      ->(output : Int64) { handle_computer_output(output) }
+    )
     @direction_facing = GridDirection::North
     @current_location = {0, 0}
     @squares_painted = Hash(Point, Color).new(Color::Black)
+    @squares_painted[{0,0}] = start_panel_color
   end
 
   def run
-    until @computer.has_finished
-      @computer.run
-      Fiber.yield
-      case @computer.state
-      when ComputerState::WaitingForInput
-        unless @computer.input_channel.closed?
-          next_input = decide_input
-          spawn { @computer.input_channel.send(next_input) }
-          Fiber.yield
-        end
-      when ComputerState::WaitingForOutputReceived
-        unless @computer.output_channel.closed?
-          spawn do 
-            computer_output = @computer.output_channel.receive 
-            handle_computer_output(computer_output)
-          end
-          Fiber.yield
-        end
-      end
-    end
+    @computer.run
   end
 
   private def decide_input : Int64
@@ -77,7 +65,7 @@ class Robot
     end.not_nil!
   end
 
-  private def handle_computer_output(computer_output : Int64)
+  private def handle_computer_output(computer_output : Int64) : Nil
     if @output_idx.even?
       # every output pair's first output tells us which color to paint the current square
       color = Color.new(computer_output.to_i32) 
@@ -108,8 +96,7 @@ class Day11
   end
 
   def part1
-    computer = NetworkedIntcodeComputer.new(@input, "Robot Computer", DebugLevel::IO)
-    robot = Robot.new(computer)
+    robot = Robot.new(@input)
     robot.run
     robot.squares_painted.size
   end
