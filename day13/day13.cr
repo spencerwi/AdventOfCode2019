@@ -58,7 +58,7 @@ class Day13
     updated_program = @program.dup
     updated_program[0] = 2
     computer = YieldingIntcodeComputer.new(
-      @program,
+      updated_program,
       ->{ 
         ball_x, _ = screen.key_for(TileId::Ball)
         paddle_x, _ = screen.key_for(TileId::Paddle)
@@ -88,11 +88,7 @@ class Day13
         return nil
       }
     )
-    loop do 
-      computer.run
-      block_count = screen.values.count(TileId::Block)
-      break if block_count == 0
-    end
+    computer.run # The game will end when all blocks are gone.
     return score
   end
 end
@@ -100,5 +96,5 @@ end
 unless PROGRAM_NAME.includes?("crystal-run-spec")
   day13 = Day13.new(File.read("input.txt").split(",").map(&.to_i64))
   puts "Part 1: #{day13.part1}"
-#  puts "Part 2: #{day13.part2}"
+  puts "Part 2: #{day13.part2}"
 end
